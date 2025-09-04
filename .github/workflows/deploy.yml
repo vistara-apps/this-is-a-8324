@@ -35,6 +35,8 @@ jobs:
         vercel-args: '--prod'
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        github-comment: true
+        github-deployment: false
         
     - name: Deploy to Vercel (Preview)
       if: (github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master') && secrets.VERCEL_TOKEN != ''
@@ -44,6 +46,8 @@ jobs:
         vercel-args: '--no-wait'
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        github-comment: true
+        github-deployment: false
         
     - name: Vercel deployment skipped
       if: secrets.VERCEL_TOKEN == ''
