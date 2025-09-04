@@ -15,14 +15,23 @@ const OPENAI_BASE_URL = 'https://api.openai.com/v1'
 
 class OpenAIService {
   constructor() {
-    validateOpenAIConfig()
-    this.baseHeaders = {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
+    // Lazy initialization - validate only when actually used
+    this.initialized = false
+  }
+
+  ensureInitialized() {
+    if (!this.initialized) {
+      validateOpenAIConfig()
+      this.baseHeaders = {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+      this.initialized = true
     }
   }
 
   async generateAdVariations(imageFile, productDescription, options = {}) {
+    this.ensureInitialized()
     const startTime = Date.now()
     
     try {
@@ -62,6 +71,7 @@ class OpenAIService {
   }
 
   async generateTextVariations(imageBase64, productDescription, options = {}) {
+    this.ensureInitialized()
     const {
       variationCount = 4,
       tone = 'engaging',
@@ -234,6 +244,7 @@ Make each variation distinctly different in approach and messaging.`
   }
 
   async generateCustomPrompt(userPrompt, imageFile) {
+    this.ensureInitialized()
     const startTime = Date.now()
     
     try {
@@ -302,6 +313,7 @@ Make each variation distinctly different in approach and messaging.`
 
   // Get usage statistics
   async getUsageStats() {
+    this.ensureInitialized()
     try {
       const response = await apiRequest(`${OPENAI_BASE_URL}/usage`, {
         headers: this.baseHeaders
