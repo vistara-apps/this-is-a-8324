@@ -3,22 +3,36 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+// Only validate environment variables in production or when actually using Supabase
+const validateSupabaseConfig = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
+// Create Supabase client with fallback for missing environment variables
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
+  : null
+
+// Helper function to ensure Supabase is initialized
+const ensureSupabaseInitialized = () => {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized. Please check your environment variables.')
   }
-})
+}
 
 // Database helper functions
 export const db = {
   // User operations
   async createUser(userData) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('users')
       .insert([userData])
@@ -30,6 +44,7 @@ export const db = {
   },
 
   async getUserById(userId) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -41,6 +56,7 @@ export const db = {
   },
 
   async updateUser(userId, updates) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('users')
       .update(updates)
@@ -54,6 +70,7 @@ export const db = {
 
   // Ad Creative operations
   async createAdCreative(creativeData) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('ad_creatives')
       .insert([creativeData])
@@ -65,6 +82,7 @@ export const db = {
   },
 
   async getAdCreativesByUser(userId) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('ad_creatives')
       .select('*')
@@ -76,6 +94,7 @@ export const db = {
   },
 
   async updateAdCreative(creativeId, updates) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('ad_creatives')
       .update(updates)
@@ -89,6 +108,7 @@ export const db = {
 
   // Post Job operations
   async createPostJob(jobData) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('post_jobs')
       .insert([jobData])
@@ -100,6 +120,7 @@ export const db = {
   },
 
   async getPostJobsByCreative(creativeId) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('post_jobs')
       .select('*')
@@ -111,6 +132,7 @@ export const db = {
   },
 
   async updatePostJobMetrics(jobId, metrics) {
+    ensureSupabaseInitialized()
     const { data, error } = await supabase
       .from('post_jobs')
       .update({ performance_metrics: metrics })

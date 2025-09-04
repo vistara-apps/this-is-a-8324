@@ -5,15 +5,20 @@ import { validateEnvVars } from '../utils/api.js'
 import { ServiceUnavailableError, ValidationError } from '../utils/errors.js'
 import { supabase } from '../lib/supabase.js'
 
-// Validate required environment variables
-validateEnvVars(['VITE_STRIPE_PUBLISHABLE_KEY'])
-
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+
+// Validate required environment variables when service is used
+const validateStripeConfig = () => {
+  if (!STRIPE_PUBLISHABLE_KEY) {
+    throw new Error('Missing required environment variable: VITE_STRIPE_PUBLISHABLE_KEY')
+  }
+}
 const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173'
 
 // Initialize Stripe
 let stripePromise
 const getStripe = () => {
+  validateStripeConfig()
   if (!stripePromise) {
     stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
   }

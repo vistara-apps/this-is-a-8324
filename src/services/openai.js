@@ -3,14 +3,19 @@ import { apiRequest, rateLimiter, withRetry, logAPICall } from '../utils/api.js'
 import { validateEnvVars, convertImageToBase64 } from '../utils/api.js'
 import { ServiceUnavailableError, ValidationError, QuotaExceededError } from '../utils/errors.js'
 
-// Validate required environment variables
-validateEnvVars(['VITE_OPENAI_API_KEY'])
-
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
+
+// Validate required environment variables when service is used
+const validateOpenAIConfig = () => {
+  if (!OPENAI_API_KEY) {
+    throw new Error('Missing required environment variable: VITE_OPENAI_API_KEY')
+  }
+}
 const OPENAI_BASE_URL = 'https://api.openai.com/v1'
 
 class OpenAIService {
   constructor() {
+    validateOpenAIConfig()
     this.baseHeaders = {
       'Authorization': `Bearer ${OPENAI_API_KEY}`,
       'Content-Type': 'application/json'

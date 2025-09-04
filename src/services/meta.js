@@ -4,11 +4,15 @@ import { validateEnvVars } from '../utils/api.js'
 import { ServiceUnavailableError, ValidationError, AuthenticationError } from '../utils/errors.js'
 import { supabase } from '../lib/supabase.js'
 
-// Validate required environment variables
-validateEnvVars(['VITE_META_APP_ID', 'VITE_META_REDIRECT_URI'])
-
 const META_APP_ID = import.meta.env.VITE_META_APP_ID
 const META_REDIRECT_URI = import.meta.env.VITE_META_REDIRECT_URI
+
+// Validate required environment variables when service is used
+const validateMetaConfig = () => {
+  if (!META_APP_ID || !META_REDIRECT_URI) {
+    throw new Error('Missing required environment variables: VITE_META_APP_ID, VITE_META_REDIRECT_URI')
+  }
+}
 const GRAPH_API_BASE_URL = 'https://graph.facebook.com/v18.0'
 
 class MetaService {
@@ -23,6 +27,7 @@ class MetaService {
 
   // OAuth flow initiation
   getAuthUrl(state = null) {
+    validateMetaConfig()
     const params = new URLSearchParams({
       client_id: META_APP_ID,
       redirect_uri: META_REDIRECT_URI,
